@@ -38,7 +38,7 @@ public class WheelRotate : MonoBehaviour
         collider.GetWorldPose(out _pos, out _quat);
 
         transform.position = _pos;
-        transform.rotation =Quaternion.Euler(_quat.eulerAngles.x, transform.rotation.eulerAngles.y, _quat.eulerAngles.z);
+        transform.rotation = _quat; 
     }
 
     private void Accelerate()

@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Generate : MonoBehaviour
 {
+    const int normal_car = 525882947;
+
     public GameObject platform;
     public GameObject wheel;
     public GameObject cabin;
 
     void Start()
     {
-        Random.InitState((int)System.DateTime.Now.Ticks);
+        Random.InitState(normal_car);
         CarObject Main = new CarObject(transform, platform, transform.position, transform.rotation, -1, ObjectType.Platform);
         Main.GenerateAll(platform, wheel, cabin, 3);
         Main.GenerateAll(platform, wheel, cabin, 3);

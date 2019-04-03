@@ -41,7 +41,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4371659366585333598}
-  m_Mesh: {fileID: 4300000, guid: 476ad6eaf51a6134d95d7120ec77064e, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 6cebcd72094da06418ab8c3a68f71d99, type: 3}
 --- !u!23 &4371659366587263390
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -121,4 +121,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11a712a27a7a6cb408c796f5d46737aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxSteerAngle: 30
+  motorForce: 500
   streengthCoefficient: 10000

@@ -97,9 +97,9 @@ WheelCollider:
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
-    m_ExtremumSlip: 0.4
+    m_ExtremumSlip: 6
     m_ExtremumValue: 1
-    m_AsymptoteSlip: 0.8
+    m_AsymptoteSlip: 6
     m_AsymptoteValue: 0.5
     m_Stiffness: 1
   m_SidewaysFriction:
@@ -121,3 +121,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11a712a27a7a6cb408c796f5d46737aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  streengthCoefficient: 10000

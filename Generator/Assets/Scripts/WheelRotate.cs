@@ -5,13 +5,7 @@ public class WheelRotate : MonoBehaviour
 {
     WheelCollider collider;
 
-    public float maxMotorTorque; // maximum torque the motor can apply to wheel
-    public float maxSteeringAngle; // maximum steer angle the wheel can have
-
-    float DAMax = 40f;
-    float WheelAngleMax = 10f;
-    float MAxSpeed = 100f;
-    float Speed = 40f;
+    public float streengthCoefficient = 10000f;
 
     void Start()
     {
@@ -21,7 +15,10 @@ public class WheelRotate : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float motor = maxMotorTorque * Input.GetAxis("Vertical");
+        if (transform.rotation.y < 0)
+            collider.motorTorque = streengthCoefficient * Time.deltaTime * Input.GetAxis("Vertical");
+
+
 
         transform.Rotate(0, 0, collider.rpm / 60 * 360 * Time.deltaTime);
     }

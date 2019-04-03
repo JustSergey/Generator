@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MoveCar : MonoBehaviour
 {
-    private float speed = 0.5f;
+    private float speed = 0.2f;
     Rigidbody rigidbody;
 
     void Start()
@@ -15,12 +15,12 @@ public class MoveCar : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        //float horizontal = Input.GetAxis("Horizontal");
+        //float vertical = Input.GetAxis("Vertical");
 
-        Vector3 velocity = (transform.forward * vertical) * speed;
-        rigidbody.MovePosition(transform.position + velocity);
+        //Vector3 velocity = (transform.forward * vertical) * speed;
+        //rigidbody.MovePosition(transform.position + velocity);
 
-        rigidbody.MoveRotation(transform.rotation * Quaternion.Euler(0f, horizontal * vertical, 0f));
+        //rigidbody.MoveRotation(transform.rotation * Quaternion.Euler(0f, horizontal * vertical, 0f));
     }
 }

@@ -11,7 +11,10 @@ public class CabinTextureMeshSwap : MonoBehaviour
     {
         Mesh = transform.GetChild(0).gameObject;
         Mesh_low = transform.GetChild(1).gameObject;
+    }
 
+    public void Swap()
+    {
 
     }
 

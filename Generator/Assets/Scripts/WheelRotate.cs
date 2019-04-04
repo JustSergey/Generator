@@ -13,12 +13,26 @@ public class WheelRotate : MonoBehaviour
 
 
     WheelCollider collider;
+    GameObject Mesh;
+    Transform CenterOfMass;
 
     public float streengthCoefficient = 100000f;
 
     void Start()
     {
         collider = GetComponent<WheelCollider>();
+        CenterOfMass = GameObject.Find("CenterOfMass").transform;
+        RotateMesh();
+    }
+
+    private void RotateMesh()
+    {
+        Mesh = transform.GetChild(0).gameObject;
+
+        if (collider.transform.localPosition.x > 0)
+            Mesh.transform.localRotation = Quaternion.Euler(0, -90, 0);
+        else
+            Mesh.transform.localRotation = Quaternion.Euler(0, 90, 0);
     }
 
     // Update is called once per frame
@@ -49,7 +63,12 @@ public class WheelRotate : MonoBehaviour
     private void Steer()
     {
         m_steeringAngle = maxSteerAngle * m_horizontalInput;
-        collider.steerAngle = m_steeringAngle;
+        if (transform.localPosition.z < CenterOfMass.localPosition.z)
+        {
+            collider.steerAngle = m_steeringAngle;
+            Debug.Log("Child transform position:" + transform.localPosition);
+        }
+
     }
 
     private void GetInput()

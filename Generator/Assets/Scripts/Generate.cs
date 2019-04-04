@@ -18,6 +18,7 @@ public class Generate : MonoBehaviour
         Main.GenerateAll(platform, wheel, cabin, 3);
         Main.GenerateAll(platform, wheel, cabin, 3);
         Main.GenerateAll(platform, wheel, cabin, 3);
+        
     }
 }
 

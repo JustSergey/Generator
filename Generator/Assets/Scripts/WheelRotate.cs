@@ -6,17 +6,19 @@ public class WheelRotate : MonoBehaviour
 {
     private float m_horizontalInput;
     private float m_verticalInput;
-    private float m_steeringAngle;
 
-    public float maxSteerAngle = 30;
-    public float motorForce = 500;
+    [SerializeField]
+    float maxSteerAngle = 30;
+    [SerializeField]
+    float motorForce = 1000;
+
+    [SerializeField]
+    float brakeForce = 4;
 
 
     WheelCollider collider;
     GameObject Mesh;
     Transform CenterOfMass;
-
-    public float streengthCoefficient = 100000f;
 
     void Start()
     {
@@ -41,6 +43,7 @@ public class WheelRotate : MonoBehaviour
         GetInput();
         Steer();
         Accelerate();
+        inhibit();
         UpdateWheelPoses();
     }
 
@@ -60,15 +63,18 @@ public class WheelRotate : MonoBehaviour
         collider.motorTorque = m_verticalInput * motorForce;
     }
 
+    private void inhibit()
+    {
+        if (Input.GetKey(KeyCode.Space))
+            collider.brakeTorque = motorForce * brakeForce;
+        else
+            collider.brakeTorque = 0;
+    }
+
     private void Steer()
     {
-        m_steeringAngle = maxSteerAngle * m_horizontalInput;
         if (transform.localPosition.z < CenterOfMass.localPosition.z)
-        {
-            collider.steerAngle = m_steeringAngle;
-            Debug.Log("Child transform position:" + transform.localPosition);
-        }
-
+            collider.steerAngle = maxSteerAngle * m_horizontalInput;
     }
 
     private void GetInput()

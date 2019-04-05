@@ -6,6 +6,7 @@ using UnityEngine;
 public class Generate : MonoBehaviour
 {
     const int normal_car = 525882947;
+    int random_Car = (int)System.DateTime.Now.Ticks;
 
     public GameObject platform;
     public GameObject wheel;

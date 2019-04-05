@@ -6,15 +6,17 @@ public class MoveCamera : MonoBehaviour
 {
     [SerializeField]
     GameObject player;
-    private Vector3 offset;
+    private Vector3 pos;
 
     void Start()
     {
-        offset = transform.position - player.transform.position;
+        pos = player.transform.InverseTransformPoint(transform.position);
     }
 
     void LateUpdate()
     {
-        transform.position = player.transform.position + offset;
+        transform.position = player.transform.TransformPoint(pos);
+        transform.position = new Vector3(transform.position.x, player.transform.position.y + 10, transform.position.z); 
+        transform.LookAt(player.transform.position);
     }
 }

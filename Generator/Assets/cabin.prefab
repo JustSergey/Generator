@@ -166,7 +166,6 @@ GameObject:
   - component: {fileID: 8997588578058627924}
   - component: {fileID: 8997588578059594132}
   - component: {fileID: 3634439066644630622}
-  - component: {fileID: 3848411419473616500}
   m_Layer: 0
   m_Name: cabin
   m_TagString: Untagged
@@ -249,15 +248,3 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 14
   m_Mesh: {fileID: 4300000, guid: 5d41f2f780c8c7f4295c41414f9755dc, type: 3}
---- !u!114 &3848411419473616500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8997588578061530966}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5833e84d26b1189419a477f55d47cb07, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

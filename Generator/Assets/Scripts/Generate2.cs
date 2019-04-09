@@ -11,9 +11,11 @@ public class Generate2 : MonoBehaviour
     void Start()
     {
         Random.InitState((int)System.DateTime.Now.Ticks);
-        Car car = new Car(detailPrefabs, transform);
+        Grid grid = new Grid(new Vector3(11, 11, 11), new Vector3(5, 5, 5));
+        grid.SetDetail(new Vector3(11, 11, 11), Detail.Empty);
+        Car car = new Car(detailPrefabs, transform, grid);
         car.Generate(3);
-
+        
     }
 }
 
@@ -25,6 +27,33 @@ public struct DetailPrefabs
     public GameObject Cabin;
 }
 
+public struct Grid
+{
+    public Vector3 CurrentPosition;
+    public readonly Vector3 Size;
+    private Detail[,,] data;
+
+    public Grid(Vector3 size, Vector3 begin_position)
+    {
+        CurrentPosition = begin_position;
+        Size = new Vector3((int)size.x, (int)size.y, (int)size.z);
+        data = new Detail[(int)Size.x, (int)Size.y, (int)Size.z];
+    }
+
+    public void SetDetail(Detail detail)
+    {
+        this[(int)CurrentPosition.x, (int)CurrentPosition.y, (int)CurrentPosition.z] = detail;
+    }
+
+    public Detail this[int x, int y, int z]
+    {
+        get => x < Size.x && y < Size.y && z < Size.z &&
+            x >= 0 && y >= 0 && z >= 0 ? data[x, y, z] : throw new System.ArgumentOutOfRangeException();
+        set { if (x < Size.x && y < Size.y && z < Size.z &&
+            x >= 0 && y >= 0 && z >= 0) data[x, y, z] = value; else throw new System.ArgumentOutOfRangeException(); }
+    }
+}
+
 public class Detail : MonoBehaviour
 {
     public DetailType Type;
@@ -32,9 +61,12 @@ public class Detail : MonoBehaviour
     private GameObject detailObject;
     public Detail[] Next;
 
+    public static Detail Empty => new Detail(null, Vector3.zero, Quaternion.identity, null, Direction.Null, DetailType.length);
+
     public Detail(GameObject _detail_object, Vector3 _position, Quaternion _rotation, Transform _parent, Direction _direction, DetailType _type)
     {
-        detailObject = Instantiate(_detail_object, _position, _rotation, _parent);
+        if (_detail_object != null)
+            detailObject = Instantiate(_detail_object, _position, _rotation, _parent);
         Direction = _direction;
         Type = _type;
         Next = new Detail[(int)Direction.length];
@@ -82,24 +114,27 @@ public class Car : MonoBehaviour
     private Detail Head;
     private Probabilities probabilities;
     private DetailPrefabs detailPrefabs;
+    private Grid grid;
 
-    public Car(DetailPrefabs _detailPrefabs, Transform _transform)
+    public Car(DetailPrefabs _detailPrefabs, Transform _transform, Grid _grid)
     {
+        grid = _grid;
         detailPrefabs = _detailPrefabs;
         Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform, Direction.Null, DetailType.Platform);
+        grid.SetDetail(Head);
         probabilities = new Probabilities { Direction = new int[4], Detail = new int[byte.MaxValue] };
     }
 
-    public void Generate(int len)
+    public void Generate(int deep)
     {
         int num = Head.Generate(detailPrefabs);
-        if (len <= 0)
+        if (deep <= 0)
             return;
-        len--;
+        deep--;
         for (int i = 0; i < num; i++)
         {
             Head = Head.Next[i];
-            Generate(len);
+            Generate(deep);
         }
     }
 }

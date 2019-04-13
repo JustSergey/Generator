@@ -63,7 +63,7 @@ public class CarObject : MonoBehaviour
             if (type == 0 || type == 1)
             {
                 Bounds wheel_bounds = _wheel.GetComponent<Renderer>().bounds;
-                Vector3 offset = new Vector3(bounds.size.x / 2 + wheel_bounds.size.x / 2, 0, 0);
+                Vector3 offset = new Vector3(bounds.size.x / 2, 0, 0);
                 return new CarObject[] {
                     new CarObject(car_Object.transform.parent, _wheel, car_Object.transform.position + offset, Quaternion.Euler(0, -90, 0), 1, ObjectType.Wheel),
                     new CarObject(car_Object.transform.parent, _wheel, car_Object.transform.position - offset, Quaternion.Euler(0, 90, 0), 3, ObjectType.Wheel)};

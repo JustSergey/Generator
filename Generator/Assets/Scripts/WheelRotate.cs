@@ -32,9 +32,9 @@ public class WheelRotate : MonoBehaviour
         Mesh = transform.GetChild(0).gameObject;
 
         if (collider.transform.localPosition.x > 0)
-            Mesh.transform.localRotation = Quaternion.Euler(0, -90, 0);
+            Mesh.transform.localRotation = Quaternion.Euler(0, 0, 0);
         else
-            Mesh.transform.localRotation = Quaternion.Euler(0, 90, 0);
+            Mesh.transform.localRotation = Quaternion.Euler(0, 180, 0);
     }
 
     // Update is called once per frame
@@ -66,7 +66,7 @@ public class WheelRotate : MonoBehaviour
     private void inhibit()
     {
         if (Input.GetKey(KeyCode.Space))
-            collider.brakeTorque = motorForce * brakeForce;
+                collider.brakeTorque = motorForce * brakeForce;
         else
             collider.brakeTorque = 0;
     }

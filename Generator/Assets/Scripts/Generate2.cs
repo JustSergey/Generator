@@ -11,13 +11,15 @@ public class Generate2 : MonoBehaviour
     void Start()
     {
         Random.InitState((int)System.DateTime.Now.Ticks);
-        Grid grid = new Grid(new Vector3(11, 11, 11), new Vector3(5, 5, 5));
-        grid.SetDetail(new Vector3(11, 11, 11), Detail.Empty);
+        Grid grid = new Grid(new Vector3(11, 6, 11), new Vector3(5, 0, 5));
         Car car = new Car(detailPrefabs, transform, grid);
+        Detail detail = Detail.Empty;
         car.Generate(3);
-        
     }
 }
+
+public enum Direction { Forward, Back, Up, AtSide, length }
+public enum DetailType { Empty, Platform, Wheel, Cabin, length }
 
 [System.Serializable]
 public struct DetailPrefabs
@@ -25,6 +27,90 @@ public struct DetailPrefabs
     public GameObject Platform;
     public GameObject Wheel;
     public GameObject Cabin;
+}
+
+public class Detail : MonoBehaviour
+{
+    public static Detail Empty => new Detail(null, Vector3.zero, Quaternion.identity, null);
+    
+    private readonly GameObject detailObject;
+    private static Dictionary<Direction, Vector3> direction_offset = new Dictionary<Direction, Vector3>
+    {
+        { Direction.Forward, new Vector3(0, 0, 1) },
+        { Direction.Back, new Vector3(0, 0, -1) },
+        { Direction.AtSide, new Vector3(1, 0, 0) },
+        { Direction.Up, new Vector3(0, 1, 0) }
+    };
+
+    public Detail(GameObject prefab, Vector3 _position, Quaternion _rotation, Transform _parent)
+    {
+        if (prefab != null)
+            detailObject = Instantiate(prefab, _position, _rotation, _parent);
+    }
+
+    public Detail[] Generate(DetailPrefabs detailPrefabs, int distance_from_center, Probabilities probabilities, Grid grid)
+    {
+        Detail[] details = new Detail[(int)Direction.length];
+        for (int dir = 0; dir < (int)Direction.length; dir++)
+        {
+            float[] probability = probabilities.GetProbabilities(distance_from_center, (Direction)dir);
+            float rnd = Random.Range(0f, 99.9f);
+            float sum = probability[0];
+            if (rnd <= sum)
+                details[dir] = Empty;
+            else
+            {
+                for (int j = 1; j < probability.Length; j++)
+                {
+                    sum += probability[j];
+                    if (rnd <= sum)
+                    {
+                        var field = typeof(DetailPrefabs).GetFields()[j - 1];
+                        GameObject prefab = (GameObject)field.GetValue(detailPrefabs);
+
+                        Vector3 detail_size = detailObject.GetComponent<Renderer>().bounds.size;
+                        Vector3 prefab_size = prefab.GetComponent<Renderer>().bounds.size;
+                        Vector3 offset = (detail_size + prefab_size) / 2;
+                        direction_offset.TryGetValue((Direction)dir, out Vector3 mult_offset);
+                        offset = new Vector3(offset.x * mult_offset.x, offset.y * mult_offset.y, offset.z * mult_offset.z);
+                        details[dir] = new Detail(prefab, detailObject.transform.position + offset, Quaternion.identity, detailObject.transform.parent);
+                        break;
+                    }
+                }
+            }
+        }
+        return details;
+    }
+}
+
+public class Car : MonoBehaviour
+{
+    private Detail Head;
+    private Probabilities probabilities;
+    private DetailPrefabs detailPrefabs;
+    private Grid grid;
+
+    public Car(DetailPrefabs _detailPrefabs, Transform _transform, Grid _grid)
+    {
+        detailPrefabs = _detailPrefabs;
+        grid = _grid;
+        Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform);
+        grid.SetDetail(Head);
+        probabilities = new Probabilities((int)grid.Size.magnitude);
+    }
+
+    public void Generate(int deep)
+    {
+        Detail[] details = Head.Generate(detailPrefabs, deep, probabilities, grid);
+        if (deep <= 0)
+            return;
+        deep--;
+        for (int i = 0; i < details.Length; i++)
+        {
+            Head = details[i];
+            Generate(deep);
+        }
+    }
 }
 
 public struct Grid
@@ -49,101 +135,48 @@ public struct Grid
     {
         get => x < Size.x && y < Size.y && z < Size.z &&
             x >= 0 && y >= 0 && z >= 0 ? data[x, y, z] : throw new System.ArgumentOutOfRangeException();
-        set { if (x < Size.x && y < Size.y && z < Size.z &&
-            x >= 0 && y >= 0 && z >= 0) data[x, y, z] = value; else throw new System.ArgumentOutOfRangeException(); }
-    }
-}
-
-public class Detail : MonoBehaviour
-{
-    public DetailType Type;
-    public Direction Direction;
-    private GameObject detailObject;
-    public Detail[] Next;
-
-    public static Detail Empty => new Detail(null, Vector3.zero, Quaternion.identity, null, Direction.Null, DetailType.length);
-
-    public Detail(GameObject _detail_object, Vector3 _position, Quaternion _rotation, Transform _parent, Direction _direction, DetailType _type)
-    {
-        if (_detail_object != null)
-            detailObject = Instantiate(_detail_object, _position, _rotation, _parent);
-        Direction = _direction;
-        Type = _type;
-        Next = new Detail[(int)Direction.length];
-    }
-
-    public int Generate(DetailPrefabs detailPrefabs)
-    {
-        if (Type == DetailType.Wheel)
-            return -1;
-        int num = Random.Range((Direction == Direction.Null) ? 2 : 1, (int)Direction.length);
-        for (int i = 0; i < num; i++)
+        set
         {
-            Direction direction;
-            do
-            {
-                direction = (Direction)Random.Range(0, (int)Direction.length);
-            } while (direction == Direction.Forward && Direction == Direction.Back ||
-                    direction == Direction.Back && Direction == Direction.Forward);
-            DetailType detailType = (DetailType)Random.Range(0, (int)DetailType.length);
-
-            var field = typeof(DetailPrefabs).GetField(detailType.ToString());
-            GameObject prefab = (GameObject)field.GetValue(detailPrefabs);
-
-            Vector3 detail_size = detailObject.GetComponent<Renderer>().bounds.size;
-            Vector3 prefab_size = prefab.GetComponent<Renderer>().bounds.size;
-            Vector3 offset = new Vector3(0, 0, 0);
-            if (direction == Direction.Forward)
-                offset = new Vector3(0, 0, detail_size.z / 2 + prefab_size.z / 2);
-            else if (direction == Direction.Back)
-                offset = -new Vector3(0, 0, detail_size.z / 2 + prefab_size.z / 2);
-            else if (direction == Direction.AtSide)
-                offset = new Vector3(detail_size.x / 2 + prefab_size.x / 2, 0, 0);
-            else if (direction == Direction.Up)
-                offset = new Vector3(0, detail_size.y / 2 + prefab_size.y / 2, 0);
-
-            Next[i] = new Detail(prefab, detailObject.transform.position + offset,
-                Quaternion.identity, detailObject.transform.parent, direction, detailType);
-        }
-        return num;
-    }
-}
-
-public class Car : MonoBehaviour
-{
-    private Detail Head;
-    private Probabilities probabilities;
-    private DetailPrefabs detailPrefabs;
-    private Grid grid;
-
-    public Car(DetailPrefabs _detailPrefabs, Transform _transform, Grid _grid)
-    {
-        grid = _grid;
-        detailPrefabs = _detailPrefabs;
-        Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform, Direction.Null, DetailType.Platform);
-        grid.SetDetail(Head);
-        probabilities = new Probabilities { Direction = new int[4], Detail = new int[byte.MaxValue] };
-    }
-
-    public void Generate(int deep)
-    {
-        int num = Head.Generate(detailPrefabs);
-        if (deep <= 0)
-            return;
-        deep--;
-        for (int i = 0; i < num; i++)
-        {
-            Head = Head.Next[i];
-            Generate(deep);
+            if (x < Size.x && y < Size.y && z < Size.z &&
+          x >= 0 && y >= 0 && z >= 0) data[x, y, z] = value;
+            else throw new System.ArgumentOutOfRangeException();
         }
     }
 }
-
-public enum Direction { Null = -1, Forward, Back, Up, AtSide, length }
-public enum DetailType { Platform, Wheel, Cabin, length }
 
 public struct Probabilities
 {
-    public int[] Direction;
-    public int[] Detail;
+    private float[][][] data;
+
+    public Probabilities(int size)
+    {
+        data = new float[size][][];
+        for (int i = 0; i < size; i++)
+        {
+            data[i] = new float[(int)Direction.length][];
+            for (int j = 0; j < data[i].Length; j++)
+                data[i][j] = new float[(int)DetailType.length];
+        }
+    }
+
+    public void SetDefaultProbabilities()
+    {
+
+    }
+
+    public void Normalize(int distance_from_center, Direction direction)
+    {
+        float[] _data = GetProbabilities(distance_from_center, direction);
+        float sum = _data[0];
+        for (int i = 1; i < _data.Length; i++)
+            sum += _data[i];
+        sum = 100 / sum;
+        for (int i = 0; i < _data.Length; i++)
+            data[distance_from_center][(int)direction][i] *= sum;
+    }
+
+    public float[] GetProbabilities(int distance_from_center, Direction direction)
+    {
+        return data[distance_from_center][(int)direction];
+    }
 }

@@ -13,7 +13,7 @@ public class Generate2 : MonoBehaviour
         Random.InitState((int)System.DateTime.Now.Ticks);
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
         Car car = new Car(detailPrefabs, transform, grid);
-        car.Generate(3);
+        car.Generate(0, 2);
     }
 }
 
@@ -34,7 +34,7 @@ public class Detail
 
     public Vector3 GridPosition;
     private readonly GameObject detailObject;
-    private static Dictionary<Direction, Vector3> direction_to_vector = new Dictionary<Direction, Vector3>
+    private static Dictionary<Direction, Vector3> directionVector = new Dictionary<Direction, Vector3>
     {
         { Direction.Forward, new Vector3(0, 0, 1) },
         { Direction.Back, new Vector3(0, 0, -1) },
@@ -48,36 +48,39 @@ public class Detail
             detailObject = Object.Instantiate(_prefab, _position, _rotation, _parent);
     }
 
+    private Detail CreateDetail(DetailPrefabs detailPrefabs, DetailType detailType, Vector3 direction)
+    {
+        if (detailType == DetailType.Empty)
+            return Empty;
+
+        var field = typeof(DetailPrefabs).GetFields()[(int)detailType - 1];
+        GameObject prefab = (GameObject)field.GetValue(detailPrefabs);
+
+        Vector3 detail_size = detailObject.GetComponent<Renderer>().bounds.size;
+        Vector3 prefab_size = prefab.GetComponent<Renderer>().bounds.size;
+        Vector3 offset = (detail_size + prefab_size) / 2;
+        offset = new Vector3(offset.x * direction.x, offset.y * direction.y, offset.z * direction.z);
+        return new Detail(prefab, detailObject.transform.position + offset, Quaternion.identity, detailObject.transform.parent);
+    }
+
     public Detail[] Generate(DetailPrefabs detailPrefabs, int deep, Probabilities probabilities, Grid grid)
     {
         Detail[] details = new Detail[(int)Direction.length];
         for (int dir = 0; dir < (int)Direction.length; dir++)
         {
-            direction_to_vector.TryGetValue((Direction)dir, out Vector3 direction);
+            directionVector.TryGetValue((Direction)dir, out Vector3 direction);
             if (grid.CheckForDetail(grid.CurrentPosition + direction))
                 continue;
             float[] probability = probabilities.GetProbabilities(deep, (Direction)dir);
             float rnd = Random.Range(0f, 99.9f);
-            float sum = probability[0];
-            if (rnd <= sum)
-                details[dir] = Empty;
-            else
+            float sum = 0f;
+            for (int j = 0; j < probability.Length; j++)
             {
-                for (int j = 1; j < probability.Length; j++)
+                sum += probability[j];
+                if (rnd <= sum)
                 {
-                    sum += probability[j];
-                    if (rnd <= sum)
-                    {
-                        var field = typeof(DetailPrefabs).GetFields()[j - 1];
-                        GameObject prefab = (GameObject)field.GetValue(detailPrefabs);
-
-                        Vector3 detail_size = detailObject.GetComponent<Renderer>().bounds.size;
-                        Vector3 prefab_size = prefab.GetComponent<Renderer>().bounds.size;
-                        Vector3 offset = (detail_size + prefab_size) / 2;
-                        offset = new Vector3(offset.x * direction.x, offset.y * direction.y, offset.z * direction.z);
-                        details[dir] = new Detail(prefab, detailObject.transform.position + offset, Quaternion.identity, detailObject.transform.parent);
-                        break;
-                    }
+                    details[dir] = CreateDetail(detailPrefabs, (DetailType)j, direction);
+                    break;
                 }
             }
             details[dir].GridPosition = grid.CurrentPosition + direction;
@@ -107,19 +110,19 @@ public class Car
         probabilities.SetRandomProbabilities();
     }
 
-    public void Generate(int deep)
+    public void Generate(int deep, int max_deep)
     {
-        Detail[] details = Head.Generate(detailPrefabs, deep, probabilities, grid);
-        if (deep <= 0)
+        if (deep >= max_deep)
             return;
-        deep--;
+        Detail[] details = Head.Generate(detailPrefabs, deep, probabilities, grid);
+        deep++;
         for (int i = 0; i < details.Length; i++)
         {
             if (!(details[i] is null) && details[i] != Detail.Empty)
             {
                 Head = details[i];
                 grid.CurrentPosition = Head.GridPosition;
-                Generate(deep);
+                Generate(deep, max_deep);
             }
         }
     }

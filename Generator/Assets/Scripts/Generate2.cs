@@ -11,7 +11,7 @@ public class Generate2 : MonoBehaviour
     void Start()
     {
         Random.InitState((int)System.DateTime.Now.Ticks);
-        Grid grid = new Grid(new Vector3(11, 6, 11), new Vector3(5, 0, 5));
+        Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
         Car car = new Car(detailPrefabs, transform, grid);
         car.Generate(3);
     }
@@ -28,12 +28,13 @@ public struct DetailPrefabs
     public GameObject Cabin;
 }
 
-public class Detail : MonoBehaviour
+public class Detail
 {
     public static Detail Empty => new Detail(null, Vector3.zero, Quaternion.identity, null);
-    
+
+    public Vector3 GridPosition;
     private readonly GameObject detailObject;
-    private static Dictionary<Direction, Vector3> direction_offset = new Dictionary<Direction, Vector3>
+    private static Dictionary<Direction, Vector3> direction_to_vector = new Dictionary<Direction, Vector3>
     {
         { Direction.Forward, new Vector3(0, 0, 1) },
         { Direction.Back, new Vector3(0, 0, -1) },
@@ -41,18 +42,21 @@ public class Detail : MonoBehaviour
         { Direction.Up, new Vector3(0, 1, 0) }
     };
 
-    public Detail(GameObject prefab, Vector3 _position, Quaternion _rotation, Transform _parent)
+    public Detail(GameObject _prefab, Vector3 _position, Quaternion _rotation, Transform _parent)
     {
-        if (prefab != null)
-            detailObject = Instantiate(prefab, _position, _rotation, _parent);
+        if (_prefab != null)
+            detailObject = Object.Instantiate(_prefab, _position, _rotation, _parent);
     }
 
-    public Detail[] Generate(DetailPrefabs detailPrefabs, int distance_from_center, Probabilities probabilities, Grid grid)
+    public Detail[] Generate(DetailPrefabs detailPrefabs, int deep, Probabilities probabilities, Grid grid)
     {
         Detail[] details = new Detail[(int)Direction.length];
         for (int dir = 0; dir < (int)Direction.length; dir++)
         {
-            float[] probability = probabilities.GetProbabilities(distance_from_center, (Direction)dir);
+            direction_to_vector.TryGetValue((Direction)dir, out Vector3 direction);
+            if (grid.CheckForDetail(grid.CurrentPosition + direction))
+                continue;
+            float[] probability = probabilities.GetProbabilities(deep, (Direction)dir);
             float rnd = Random.Range(0f, 99.9f);
             float sum = probability[0];
             if (rnd <= sum)
@@ -70,13 +74,14 @@ public class Detail : MonoBehaviour
                         Vector3 detail_size = detailObject.GetComponent<Renderer>().bounds.size;
                         Vector3 prefab_size = prefab.GetComponent<Renderer>().bounds.size;
                         Vector3 offset = (detail_size + prefab_size) / 2;
-                        direction_offset.TryGetValue((Direction)dir, out Vector3 mult_offset);
-                        offset = new Vector3(offset.x * mult_offset.x, offset.y * mult_offset.y, offset.z * mult_offset.z);
+                        offset = new Vector3(offset.x * direction.x, offset.y * direction.y, offset.z * direction.z);
                         details[dir] = new Detail(prefab, detailObject.transform.position + offset, Quaternion.identity, detailObject.transform.parent);
                         break;
                     }
                 }
             }
+            details[dir].GridPosition = grid.CurrentPosition + direction;
+            grid.SetDetail(details[dir], details[dir].GridPosition);
         }
         return details;
     }
@@ -85,7 +90,7 @@ public class Detail : MonoBehaviour
     public static bool operator !=(Detail detail1, Detail detail2) => detail1.detailObject != detail2.detailObject;
 }
 
-public class Car : MonoBehaviour
+public class Car
 {
     private Detail Head;
     private Probabilities probabilities;
@@ -110,12 +115,12 @@ public class Car : MonoBehaviour
         deep--;
         for (int i = 0; i < details.Length; i++)
         {
-            if (details[i] != Detail.Empty)
+            if (!(details[i] is null) && details[i] != Detail.Empty)
             {
                 Head = details[i];
+                grid.CurrentPosition = Head.GridPosition;
                 Generate(deep);
             }
-            
         }
     }
 }
@@ -133,9 +138,16 @@ public struct Grid
         data = new Detail[(int)Size.x, (int)Size.y, (int)Size.z];
     }
 
+    public bool CheckForDetail(Vector3 position) => data[(int)position.x, (int)position.y, (int)position.z] is null ? false : true;
+
     public void SetDetail(Detail detail)
     {
         this[(int)CurrentPosition.x, (int)CurrentPosition.y, (int)CurrentPosition.z] = detail;
+    }
+
+    public void SetDetail(Detail detail, Vector3 position)
+    {
+        this[(int)position.x, (int)position.y, (int)position.z] = detail;
     }
 
     public Detail this[int x, int y, int z]
@@ -184,19 +196,19 @@ public struct Probabilities
 
     }
 
-    public void Normalize(int distance_from_center, Direction direction)
+    public void Normalize(int deep, Direction direction)
     {
-        float[] _data = GetProbabilities(distance_from_center, direction);
+        float[] _data = GetProbabilities(deep, direction);
         float sum = _data[0];
         for (int i = 1; i < _data.Length; i++)
             sum += _data[i];
         sum = 100 / sum;
         for (int i = 0; i < _data.Length; i++)
-            data[distance_from_center][(int)direction][i] *= sum;
+            data[deep][(int)direction][i] *= sum;
     }
 
-    public float[] GetProbabilities(int distance_from_center, Direction direction)
+    public float[] GetProbabilities(int deep, Direction direction)
     {
-        return data[distance_from_center][(int)direction];
+        return data[deep][(int)direction];
     }
 }

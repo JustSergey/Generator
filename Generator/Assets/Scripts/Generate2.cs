@@ -13,7 +13,6 @@ public class Generate2 : MonoBehaviour
         Random.InitState((int)System.DateTime.Now.Ticks);
         Grid grid = new Grid(new Vector3(11, 6, 11), new Vector3(5, 0, 5));
         Car car = new Car(detailPrefabs, transform, grid);
-        Detail detail = Detail.Empty;
         car.Generate(3);
     }
 }
@@ -81,6 +80,9 @@ public class Detail : MonoBehaviour
         }
         return details;
     }
+
+    public static bool operator ==(Detail detail1, Detail detail2) => detail1.detailObject == detail2.detailObject;
+    public static bool operator !=(Detail detail1, Detail detail2) => detail1.detailObject != detail2.detailObject;
 }
 
 public class Car : MonoBehaviour
@@ -97,6 +99,7 @@ public class Car : MonoBehaviour
         Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform);
         grid.SetDetail(Head);
         probabilities = new Probabilities((int)grid.Size.magnitude);
+        probabilities.SetRandomProbabilities();
     }
 
     public void Generate(int deep)
@@ -107,8 +110,12 @@ public class Car : MonoBehaviour
         deep--;
         for (int i = 0; i < details.Length; i++)
         {
-            Head = details[i];
-            Generate(deep);
+            if (details[i] != Detail.Empty)
+            {
+                Head = details[i];
+                Generate(deep);
+            }
+            
         }
     }
 }
@@ -156,6 +163,19 @@ public struct Probabilities
             data[i] = new float[(int)Direction.length][];
             for (int j = 0; j < data[i].Length; j++)
                 data[i][j] = new float[(int)DetailType.length];
+        }
+    }
+
+    public void SetRandomProbabilities()
+    {
+        for (int i = 0; i < data.Length; i++)
+        {
+            for (int j = 0; j < data[i].Length; j++)
+            {
+                for (int k = 0; k < data[i][j].Length; k++)
+                    data[i][j][k] = Random.Range(0f, 100f);
+                Normalize(i, (Direction)j);
+            }
         }
     }
 

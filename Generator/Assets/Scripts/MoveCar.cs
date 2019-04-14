@@ -45,15 +45,9 @@ public class MoveCar : MonoBehaviour
         {
             wheel.GetWorldPose(out _pos, out _quat);
 
-            wheel.transform.GetChild(0).position = new Vector3(_pos.x + CenterX(wheel) * wheel.center.x / 4, _pos.y, _pos.z);
+            wheel.transform.GetChild(0).position = _pos;
             wheel.transform.GetChild(0).rotation = wheel.transform.localPosition.x > centerOfMass.x ? _quat : _quat * Quaternion.Euler(0, 180, 0);
         }
-    }
-
-    private int CenterX(WheelCollider wheel)
-    {
-        bool rightpos = wheel.transform.localPosition.x > centerOfMass.x;
-            return rightpos ? 1 : -1;
     }
 
     private void Motor()

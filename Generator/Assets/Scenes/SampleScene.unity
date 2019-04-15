@@ -185,6 +185,7 @@ GameObject:
   - component: {fileID: 146157796}
   - component: {fileID: 146157795}
   - component: {fileID: 146157794}
+  - component: {fileID: 146157797}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -199,7 +200,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 146157793}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d3324fb65b8d517468c02d174e5be85e, type: 3}
   m_Name: 
@@ -239,6 +240,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &146157797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 146157793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd67e628397ab044083b2e2ccb62daf5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detailPrefabs:
+    Platform: {fileID: 1406300844955298203, guid: 41f5c660d953c2e448067fc95d7bba8b,
+      type: 3}
+    Wheel: {fileID: 4371659366585333598, guid: 49fdae2f1c66c8a4b918d1202f56f9ad, type: 3}
+    Cabin: {fileID: 8997588578061530966, guid: 31d5991228998d740bd689feae299b5e, type: 3}
 --- !u!1 &170076733
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,7 +18,7 @@ public class Generate2 : MonoBehaviour
     }
 }
 
-public enum Direction { Forward, Back, Up, AtSide, length }
+public enum Direction { Forward, Back, Up = 15, AtSide = 5, length = 4 }
 public enum DetailType { Empty, Platform, Wheel, Cabin, Weapon, Box, length }
 
 [System.Serializable]
@@ -185,7 +185,7 @@ public struct Probabilities
 
     public Probabilities(int size)
     {
-        weight = new float[3, (int)DetailType.length];
+        weight = new float[4, (int)DetailType.length];
     }
 
     public void SetRandomWeights()
@@ -199,6 +199,7 @@ public struct Probabilities
 
     public void SetDefaultWeights()
     {
+
     }
 
     public float[] Normalize(float[] data)
@@ -219,7 +220,8 @@ public struct Probabilities
         {
             result[detail] = weight[0, detail] * (int)detailType +
                             weight[1, detail] * deep +
-                            weight[2, detail] * (int)direction;
+                            weight[2, detail] * (int)direction +
+                            weight[3, detail] * (direction == Direction.AtSide ? 10 : 1);
         }
         return Normalize(result);
     }

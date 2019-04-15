@@ -67,7 +67,7 @@ public class Detail
         Vector3 position = detailObject.transform.position + offset;
         if (center.x - position.x != 0f)
         {
-            position.x += 2 * (center.x - position.x);
+            position.x = 2 * center.x - position.x;
             new Detail(prefab, position, Quaternion.identity, detailObject.transform.parent, detailType);
         }
         return new Detail(prefab, detailObject.transform.position + offset, Quaternion.identity, detailObject.transform.parent, detailType);
@@ -196,7 +196,7 @@ public struct Probabilities
         }
     }
 
-    public void SetDefaultProbabilities()
+    public void SetDefaultWeights()
     {
 
     }

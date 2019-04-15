@@ -21,6 +21,10 @@ public class MoveCar : MonoBehaviour
     void Start()
     {
         centerOfMass = GetComponent<Rigidbody>().centerOfMass;
+    }
+
+    public void InitWheels()
+    {
         GetWheels();
         RotateWheelsCollider();
     }
@@ -84,7 +88,6 @@ public class MoveCar : MonoBehaviour
 
         WheelCollider[] childTransforms = gameObject.GetComponentsInChildren<WheelCollider>() as WheelCollider[];
         foreach (var child in childTransforms)
-            if (child.gameObject.name == "Wheel_Collider")
                 WheelColliderList.Add(child);
 
         wheelColliders = WheelColliderList.ToArray();

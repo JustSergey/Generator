@@ -14,6 +14,7 @@ public class Generate2 : MonoBehaviour
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
         Car car = new Car(detailPrefabs, transform, grid);
         car.Generate(0, 2);
+        GetComponent<MoveCar>().InitWheels();
     }
 }
 

@@ -16,7 +16,7 @@ public class MoveCamera : MonoBehaviour
     void LateUpdate()
     {
         transform.position = player.transform.TransformPoint(pos);
-        transform.position = new Vector3(transform.position.x, player.transform.position.y + 10, transform.position.z); 
+        transform.position = new Vector3(transform.position.x, player.transform.position.y + 4, transform.position.z); 
         transform.LookAt(player.transform.position);
     }
 }

@@ -199,7 +199,6 @@ public struct Probabilities
 
     public void SetDefaultWeights()
     {
-
     }
 
     public float[] Normalize(float[] data)

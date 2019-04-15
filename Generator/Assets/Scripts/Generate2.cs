@@ -52,7 +52,7 @@ public class Detail
             detailObject = Object.Instantiate(_prefab, _position, _rotation, _parent);
     }
 
-    private Detail CreateDetail(DetailPrefabs detailPrefabs, DetailType detailType, Vector3 direction)
+    private Detail CreateDetail(DetailPrefabs detailPrefabs, DetailType detailType, Vector3 direction, Vector3 center)
     {
         if (detailType == DetailType.Empty)
             return Empty;
@@ -64,10 +64,16 @@ public class Detail
         Vector3 prefab_size = prefab.GetComponent<Renderer>().bounds.size;
         Vector3 offset = (detail_size + prefab_size) / 2;
         offset = new Vector3(offset.x * direction.x, offset.y * direction.y, offset.z * direction.z);
+        Vector3 position = detailObject.transform.position + offset;
+        if (center.x - position.x != 0f)
+        {
+            position.x += 2 * (center.x - position.x);
+            new Detail(prefab, position, Quaternion.identity, detailObject.transform.parent, detailType);
+        }
         return new Detail(prefab, detailObject.transform.position + offset, Quaternion.identity, detailObject.transform.parent, detailType);
     }
 
-    public Detail[] Generate(DetailPrefabs detailPrefabs, int deep, Probabilities probabilities, Grid grid)
+    public Detail[] Generate(DetailPrefabs detailPrefabs, int deep, Probabilities probabilities, Grid grid, Vector3 center)
     {
         Detail[] details = new Detail[(int)Direction.length];
         for (int dir = 0; dir < (int)Direction.length; dir++)
@@ -83,7 +89,7 @@ public class Detail
                 sum += probability[j];
                 if (rnd <= sum)
                 {
-                    details[dir] = CreateDetail(detailPrefabs, (DetailType)j, direction);
+                    details[dir] = CreateDetail(detailPrefabs, (DetailType)j, direction, center);
                     break;
                 }
             }
@@ -103,9 +109,11 @@ public class Car
     private Probabilities probabilities;
     private DetailPrefabs detailPrefabs;
     private Grid grid;
+    private Vector3 center;
 
     public Car(DetailPrefabs _detailPrefabs, Transform _transform, Grid _grid)
     {
+        center = _transform.position;
         detailPrefabs = _detailPrefabs;
         grid = _grid;
         Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform, DetailType.Platform);
@@ -118,7 +126,7 @@ public class Car
     {
         if (deep >= max_deep)
             return;
-        Detail[] details = Head.Generate(detailPrefabs, deep, probabilities, grid);
+        Detail[] details = Head.Generate(detailPrefabs, deep, probabilities, grid, center);
         deep++;
         for (int i = 0; i < details.Length; i++)
         {

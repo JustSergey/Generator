@@ -18,7 +18,7 @@ public class Generate2 : MonoBehaviour
 }
 
 public enum Direction { Forward, Back, Up, AtSide, length }
-public enum DetailType { Empty, Platform, Wheel, Cabin, length }
+public enum DetailType { Empty, Platform, Wheel, Cabin, Weapon, Box, length }
 
 [System.Serializable]
 public struct DetailPrefabs
@@ -26,14 +26,17 @@ public struct DetailPrefabs
     public GameObject Platform;
     public GameObject Wheel;
     public GameObject Cabin;
+    public GameObject Weapon;
+    public GameObject Box;
 }
 
 public class Detail
 {
-    public static Detail Empty => new Detail(null, Vector3.zero, Quaternion.identity, null);
+    public static Detail Empty => new Detail(null, Vector3.zero, Quaternion.identity, null, DetailType.Empty);
 
     public Vector3 GridPosition;
     private readonly GameObject detailObject;
+    private readonly DetailType detailType;
     private static Dictionary<Direction, Vector3> directionVector = new Dictionary<Direction, Vector3>
     {
         { Direction.Forward, new Vector3(0, 0, 1) },
@@ -42,8 +45,9 @@ public class Detail
         { Direction.Up, new Vector3(0, 1, 0) }
     };
 
-    public Detail(GameObject _prefab, Vector3 _position, Quaternion _rotation, Transform _parent)
+    public Detail(GameObject _prefab, Vector3 _position, Quaternion _rotation, Transform _parent, DetailType _detailType)
     {
+        detailType = _detailType;
         if (_prefab != null)
             detailObject = Object.Instantiate(_prefab, _position, _rotation, _parent);
     }
@@ -60,7 +64,7 @@ public class Detail
         Vector3 prefab_size = prefab.GetComponent<Renderer>().bounds.size;
         Vector3 offset = (detail_size + prefab_size) / 2;
         offset = new Vector3(offset.x * direction.x, offset.y * direction.y, offset.z * direction.z);
-        return new Detail(prefab, detailObject.transform.position + offset, Quaternion.identity, detailObject.transform.parent);
+        return new Detail(prefab, detailObject.transform.position + offset, Quaternion.identity, detailObject.transform.parent, detailType);
     }
 
     public Detail[] Generate(DetailPrefabs detailPrefabs, int deep, Probabilities probabilities, Grid grid)
@@ -71,7 +75,7 @@ public class Detail
             directionVector.TryGetValue((Direction)dir, out Vector3 direction);
             if (grid.CheckForDetail(grid.CurrentPosition + direction))
                 continue;
-            float[] probability = probabilities.GetProbabilities(deep, (Direction)dir);
+            float[] probability = probabilities.GetProbabilities(detailType, deep, (Direction)dir);
             float rnd = Random.Range(0f, 99.9f);
             float sum = 0f;
             for (int j = 0; j < probability.Length; j++)
@@ -104,10 +108,10 @@ public class Car
     {
         detailPrefabs = _detailPrefabs;
         grid = _grid;
-        Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform);
+        Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform, DetailType.Platform);
         grid.SetDetail(Head);
         probabilities = new Probabilities((int)grid.Size.magnitude);
-        probabilities.SetRandomProbabilities();
+        probabilities.SetRandomWeights();
     }
 
     public void Generate(int deep, int max_deep)
@@ -168,29 +172,19 @@ public struct Grid
 
 public struct Probabilities
 {
-    private float[][][] data;
+    private float[,] weight;
 
     public Probabilities(int size)
     {
-        data = new float[size][][];
-        for (int i = 0; i < size; i++)
-        {
-            data[i] = new float[(int)Direction.length][];
-            for (int j = 0; j < data[i].Length; j++)
-                data[i][j] = new float[(int)DetailType.length];
-        }
+        weight = new float[3, (int)DetailType.length];
     }
 
-    public void SetRandomProbabilities()
+    public void SetRandomWeights()
     {
-        for (int i = 0; i < data.Length; i++)
+        for (int i = 0; i < weight.GetLength(0); i++)
         {
-            for (int j = 0; j < data[i].Length; j++)
-            {
-                for (int k = 0; k < data[i][j].Length; k++)
-                    data[i][j][k] = Random.Range(0f, 100f);
-                Normalize(i, (Direction)j);
-            }
+            for (int j = 0; j < weight.GetLength(1); j++)
+                weight[i, j] = Random.Range(0f, 1f);
         }
     }
 
@@ -199,19 +193,26 @@ public struct Probabilities
 
     }
 
-    public void Normalize(int deep, Direction direction)
+    public float[] Normalize(float[] data)
     {
-        float[] _data = GetProbabilities(deep, direction);
-        float sum = _data[0];
-        for (int i = 1; i < _data.Length; i++)
-            sum += _data[i];
-        sum = 100 / sum;
-        for (int i = 0; i < _data.Length; i++)
-            data[deep][(int)direction][i] *= sum;
+        float sum = 0;
+        for (int i = 0; i < data.Length; i++)
+            sum += data[i];
+
+        for (int i = 0; i < data.Length; i++)
+            data[i] *= 100 / sum;
+        return data;
     }
 
-    public float[] GetProbabilities(int deep, Direction direction)
+    public float[] GetProbabilities(DetailType detailType, int deep, Direction direction)
     {
-        return data[deep][(int)direction];
+        float[] result = new float[(int)DetailType.length];
+        for (int detail = 0; detail < result.Length; detail++)
+        {
+            result[detail] = weight[0, detail] * (int)detailType +
+                            weight[1, detail] * deep +
+                            weight[2, detail] * (int)direction;
+        }
+        return Normalize(result);
     }
 }

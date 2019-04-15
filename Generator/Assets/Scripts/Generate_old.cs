@@ -2,19 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Generate : MonoBehaviour
 {
+    const int normal_car = 525882947;
+    int random_Car = (int)System.DateTime.Now.Ticks;
+
     public GameObject platform;
     public GameObject wheel;
     public GameObject cabin;
 
     void Start()
     {
-        Random.InitState((int)System.DateTime.Now.Ticks);
+        Random.InitState(normal_car);
         CarObject Main = new CarObject(transform, platform, transform.position, transform.rotation, -1, ObjectType.Platform);
         Main.GenerateAll(platform, wheel, cabin, 3);
         Main.GenerateAll(platform, wheel, cabin, 3);
         Main.GenerateAll(platform, wheel, cabin, 3);
+        
     }
 }
 
@@ -59,10 +64,10 @@ public class CarObject : MonoBehaviour
             if (type == 0 || type == 1)
             {
                 Bounds wheel_bounds = _wheel.GetComponent<Renderer>().bounds;
-                Vector3 offset = new Vector3(bounds.size.x / 2 + wheel_bounds.size.x / 2, 0, 0);
+                Vector3 offset = new Vector3(bounds.size.x / 2, 0, 0);
                 return new CarObject[] {
-                    new CarObject(car_Object.transform.parent, _wheel, car_Object.transform.position + offset, Quaternion.Euler(0, 90, 0), 1, ObjectType.Wheel),
-                    new CarObject(car_Object.transform.parent, _wheel, car_Object.transform.position - offset, Quaternion.Euler(0, -90, 0), 3, ObjectType.Wheel)};
+                    new CarObject(car_Object.transform.parent, _wheel, car_Object.transform.position + offset, Quaternion.Euler(0, -90, 0), 1, ObjectType.Wheel),
+                    new CarObject(car_Object.transform.parent, _wheel, car_Object.transform.position - offset, Quaternion.Euler(0, 90, 0), 3, ObjectType.Wheel)};
             }
             else if (type == 2)
             {

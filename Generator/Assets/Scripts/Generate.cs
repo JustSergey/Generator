@@ -3,16 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Generate2 : MonoBehaviour
+public class Generate : MonoBehaviour
 {
     [SerializeField]
     private DetailPrefabs detailPrefabs;
+
+    private static Car car;
 
     void Start()
     {
         Random.InitState((int)System.DateTime.Now.Ticks);
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
-        Car car = new Car(detailPrefabs, transform, grid);
+        car = new Car(detailPrefabs, transform, grid);
+        car.Generate(0, 2);
+        GetComponent<MoveCar>().InitWheels();
+    }
+
+    public void ReSpawn(Vector3 position, bool mutation)
+    {
+        transform.position = position;
+        Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
+        car.Clear(transform, grid);
+        if (mutation)
+            car.Mutation();
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
@@ -119,8 +132,7 @@ public class Car
         grid = _grid;
         Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform, DetailType.Platform);
         grid.SetDetail(Head);
-        probabilities = new Probabilities((int)grid.Size.magnitude);
-        probabilities.SetRandomWeights();
+        probabilities = new Probabilities(true);
     }
 
     public void Generate(int deep, int max_deep)
@@ -138,6 +150,22 @@ public class Car
                 Generate(deep, max_deep);
             }
         }
+    }
+
+    public void Clear(Transform transform, Grid grid)
+    {
+        for (int i = 0; i < transform.childCount; i++)
+            Object.Destroy(transform.GetChild(i).gameObject);
+
+        center = transform.position;
+        this.grid = grid;
+        Head = new Detail(detailPrefabs.Platform, transform.position, transform.rotation, transform, DetailType.Platform);
+        grid.SetDetail(Head);
+    }
+
+    public void Mutation()
+    {
+        probabilities.Mutation();
     }
 }
 
@@ -183,12 +211,14 @@ public struct Probabilities
 {
     private float[,] weight;
 
-    public Probabilities(int size)
+    public Probabilities(bool random)
     {
         weight = new float[4, (int)DetailType.length];
+        if (random)
+            SetRandomWeights();
     }
 
-    public void SetRandomWeights()
+    private void SetRandomWeights()
     {
         for (int i = 0; i < weight.GetLength(0); i++)
         {
@@ -204,12 +234,12 @@ public struct Probabilities
         weight[index0, index1] = Random.Range(0f, 1f);
     }
 
-    public void SetDefaultWeights()
+    private void SetDefaultWeights()
     {
 
     }
 
-    public float[] Normalize(float[] data)
+    private float[] Normalize(float[] data)
     {
         float sum = 0;
         for (int i = 0; i < data.Length; i++)

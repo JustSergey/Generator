@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 474257431981409162}
   - component: {fileID: 474257431981409161}
   - component: {fileID: 5681965855922926913}
+  - component: {fileID: 9001312515971945058}
   m_Layer: 0
   m_Name: wheel 3x6x6
   m_TagString: Untagged
@@ -70,7 +71,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 474257431981409163}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -100,6 +101,14 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!33 &9001312515971945058
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474257431981409163}
+  m_Mesh: {fileID: 4300000, guid: 78417be5abc7214429d3b277165279e1, type: 3}
 --- !u!1 &3339340784297674071
 GameObject:
   m_ObjectHideFlags: 0

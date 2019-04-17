@@ -10,27 +10,38 @@ public class Generate : MonoBehaviour
 
     private static Car car;
 
-    void Start()
+    private void Start()
     {
         Random.InitState((int)System.DateTime.Now.Ticks);
+        Create();
+    }
+
+    private void Create()
+    {
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
         car = new Car(detailPrefabs, transform, grid);
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
 
-    public void ReSpawn(Vector3 position, bool mutation)
+    public void Respawn(Vector3 position, RespawnType respawnType)
     {
         transform.position = position;
+        if (respawnType == RespawnType.Recreate)
+        {
+            Create();
+            return;
+        }
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
         car.Clear(transform, grid);
-        if (mutation)
+        if (respawnType == RespawnType.Mutation)
             car.Mutation();
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
 }
 
+public enum RespawnType { Default, Mutation, Recreate }
 public enum Direction { Forward, Back, Up, AtSide, length }
 public enum DetailType { Empty, Platform, Wheel, Cabin, Weapon, Box, length }
 

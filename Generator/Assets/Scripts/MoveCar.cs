@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveCar : MonoBehaviour
@@ -109,18 +108,14 @@ public class MachinePhysics
 
 public struct MachineInput
 {
-    private float horizontal;
-    private float vertical;
-    private bool brake;
-
-    public float Horizontal => horizontal;
-    public float Vertical => vertical;
-    public bool Brake => brake;
+    public float Horizontal { get; private set; }
+    public float Vertical { get; private set; }
+    public bool Brake { get; private set; }
 
     public void GetInput()
     {
-        horizontal = Input.GetAxis("Horizontal");
-        vertical = -Input.GetAxis("Vertical");
-        brake = Input.GetButton("Jump");
+        Horizontal = Input.GetAxis("Horizontal");
+        Vertical = -Input.GetAxis("Vertical");
+        Brake = Input.GetButton("Jump");
     }
 }

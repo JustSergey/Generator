@@ -32,6 +32,8 @@ public class MachinePhysics
     public float maxSpeed = 3000;
     public float breakSpeed = 5500;
     public float maxSteerAngle = 30;
+    public bool autoRun = true;
+
     private GameObject gameObject;
 
     private Vector3 centerOfMass;
@@ -66,7 +68,6 @@ public class MachinePhysics
         foreach (var wheel in wheelColliders)
             if (!IsDestroyed(wheel))
             {
-                Debug.Log(wheel is null);
                 wheel.GetWorldPose(out _pos, out _quat);
                 wheel.transform.GetChild(0).position = _pos;
                 wheel.transform.GetChild(0).rotation = IsRightWheel(wheel) ? _quat : _quat * Quaternion.Euler(0, 180, 0);
@@ -99,7 +100,7 @@ public class MachinePhysics
 
     private void Move(WheelCollider wheel, MachineInput input)
     {
-        wheel.motorTorque = input.Vertical * maxSpeed;
+        wheel.motorTorque = autoRun ? -maxSpeed : input.Vertical * maxSpeed;
         wheel.brakeTorque = input.Brake ? breakSpeed : 0;
     }
     

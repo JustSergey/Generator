@@ -111,16 +111,15 @@ public struct MachineInput
 {
     private float horizontal;
     private float vertical;
-    private bool brake;
 
     public float Horizontal => horizontal;
     public float Vertical => vertical;
-    public bool Brake => brake;
+    public bool Brake { get; private set; }
 
     public void GetInput()
     {
         horizontal = Input.GetAxis("Horizontal");
         vertical = -Input.GetAxis("Vertical");
-        brake = Input.GetButton("Jump");
+        Brake = Input.GetButton("Jump");
     }
 }

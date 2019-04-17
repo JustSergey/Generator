@@ -12,6 +12,8 @@ public class Genetic : MonoBehaviour
 
     void Start()
     {
+        cars = new Transform[transform.childCount];
+        begin_positions = new Vector3[transform.childCount];
         for (int i = 0; i < transform.childCount; i++)
         {
             cars[i] = transform.GetChild(i);
@@ -31,12 +33,18 @@ public class Genetic : MonoBehaviour
             System.Array.Sort(distances, cars);
 
             int bound = (int)(cars.Length * 0.25f);
-            int k = 0;
-            for (int i = bound; i < bound * 2; i++, k++)
-                cars[i] = Instantiate(cars[k]);
+            for (int k = 0, i = bound; i < bound * 2; i++, k++)
+            {
+                Destroy(cars[i].gameObject);
+                cars[i] = Instantiate(cars[k], transform);
+            }
 
             for (int i = 0; i < bound; i++)
+                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], RespawnType.Default);
+            for (int i = bound; i < bound * 2; i++)
                 cars[i].GetComponent<Generate>().Respawn(begin_positions[i], RespawnType.Mutation);
+            for (int i = bound * 2; i < cars.Length; i++)
+                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], RespawnType.Recreate);
 
             time = 0f;
         }

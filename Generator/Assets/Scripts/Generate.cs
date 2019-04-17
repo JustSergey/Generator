@@ -3,22 +3,46 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Generate2 : MonoBehaviour
+public class Generate : MonoBehaviour
 {
     [SerializeField]
     private DetailPrefabs detailPrefabs;
 
-    void Start()
+    private static Car car;
+
+    private void Start()
     {
         Random.InitState((int)System.DateTime.Now.Ticks);
+        Create();
+    }
+
+    private void Create()
+    {
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
-        Car car = new Car(detailPrefabs, transform, grid);
+        car = new Car(detailPrefabs, transform, grid);
+        car.Generate(0, 2);
+        GetComponent<MoveCar>().InitWheels();
+    }
+
+    public void Respawn(Vector3 position, RespawnType respawnType)
+    {
+        transform.position = position;
+        if (respawnType == RespawnType.Recreate)
+        {
+            Create();
+            return;
+        }
+        Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
+        car.Clear(transform, grid);
+        if (respawnType == RespawnType.Mutation)
+            car.Mutation();
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
 }
 
-public enum Direction { Forward, Back, Up = 15, AtSide = 5, length = 4 }
+public enum RespawnType { Default, Mutation, Recreate }
+public enum Direction { Forward, Back, Up, AtSide, length }
 public enum DetailType { Empty, Platform, Wheel, Cabin, Weapon, Box, length }
 
 [System.Serializable]
@@ -119,8 +143,7 @@ public class Car
         grid = _grid;
         Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform, DetailType.Platform);
         grid.SetDetail(Head);
-        probabilities = new Probabilities((int)grid.Size.magnitude);
-        probabilities.SetRandomWeights();
+        probabilities = new Probabilities(true);
     }
 
     public void Generate(int deep, int max_deep)
@@ -138,6 +161,22 @@ public class Car
                 Generate(deep, max_deep);
             }
         }
+    }
+
+    public void Clear(Transform transform, Grid grid)
+    {
+        for (int i = 0; i < transform.childCount; i++)
+            Object.Destroy(transform.GetChild(i).gameObject);
+
+        center = transform.position;
+        this.grid = grid;
+        Head = new Detail(detailPrefabs.Platform, transform.position, transform.rotation, transform, DetailType.Platform);
+        grid.SetDetail(Head);
+    }
+
+    public void Mutation()
+    {
+        probabilities.Mutation();
     }
 }
 
@@ -183,12 +222,14 @@ public struct Probabilities
 {
     private float[,] weight;
 
-    public Probabilities(int size)
+    public Probabilities(bool random)
     {
         weight = new float[4, (int)DetailType.length];
+        if (random)
+            SetRandomWeights();
     }
 
-    public void SetRandomWeights()
+    private void SetRandomWeights()
     {
         for (int i = 0; i < weight.GetLength(0); i++)
         {
@@ -197,12 +238,19 @@ public struct Probabilities
         }
     }
 
-    public void SetDefaultWeights()
+    public void Mutation()
+    {
+        int index0 = Random.Range(0, weight.GetLength(0));
+        int index1 = Random.Range(0, weight.GetLength(1));
+        weight[index0, index1] = Random.Range(0f, 1f);
+    }
+
+    private void SetDefaultWeights()
     {
 
     }
 
-    public float[] Normalize(float[] data)
+    private float[] Normalize(float[] data)
     {
         float sum = 0;
         for (int i = 0; i < data.Length; i++)
@@ -220,8 +268,8 @@ public struct Probabilities
         {
             result[detail] = weight[0, detail] * (int)detailType +
                             weight[1, detail] * deep +
-                            weight[2, detail] * (int)direction +
-                            weight[3, detail] * (direction == Direction.AtSide ? 10 : 1);
+                            weight[2, detail] * (direction == Direction.Up ? 10 : (int)direction) +
+                            weight[3, detail] * (direction == Direction.AtSide ? 10 : (int)direction);
         }
         return Normalize(result);
     }

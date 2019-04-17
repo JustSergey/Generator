@@ -1,104 +1,126 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveCar : MonoBehaviour
 {
-    private float m_horizontalInput;
-    private float m_verticalInput;
-    private bool m_brakeInput;
-
-    private Vector3 centerOfMass;
-    private WheelCollider[] wheelColliders;
-
     [SerializeField]
-    float maxSpeed = 200f;
-    [SerializeField]
-    float breakSpeed = 400f;
-    [SerializeField]
-    float maxSteerAngle = 30f;
+    private MachinePhysics motor;
+    private MachineInput control = new MachineInput();
 
-    void Start()
-    {
-        centerOfMass = GetComponent<Rigidbody>().centerOfMass;
-    }
-
-    public void InitWheels()
-    {
-        GetWheels();
-        RotateWheelsCollider();
-    }
-
-    // Update is called once per frame
     void FixedUpdate()
     {
-        GetInput();
-        Steer();
-        Motor();
+        control.GetInput();
+        motor.Steer(control);
     }
 
     private void LateUpdate()
     {
-        UpdateWheelPoses();
+        motor.AnimateMesh();
     }
-    private void UpdateWheelPoses()
+
+    public void InitWheels()
     {
-        Vector3 _pos;
-        Quaternion _quat;
-        foreach (var wheel in wheelColliders)
-        {
-            wheel.GetWorldPose(out _pos, out _quat);
-
-            wheel.transform.GetChild(0).position = _pos;
-            wheel.transform.GetChild(0).rotation = wheel.transform.localPosition.x > centerOfMass.x ? _quat : _quat * Quaternion.Euler(0, 180, 0);
-        }
+        motor = new MachinePhysics(gameObject,GetComponent<Rigidbody>().centerOfMass);
+        motor.UpdateWheels();
+        motor.RotateWheelsColliders();
     }
+}
 
-    private void Motor()
+[System.Serializable]
+public class MachinePhysics
+{
+    public float maxSpeed = 3000;
+    public float breakSpeed = 5500;
+    public float maxSteerAngle = 30;
+    private GameObject gameObject;
+
+    private Vector3 centerOfMass;
+    private WheelCollider[] wheelColliders;
+
+    public MachinePhysics(GameObject _gameObject,Vector3 _centerOfMass)
     {
-        foreach (var wheel in wheelColliders)
-        {
-            wheel.motorTorque = m_verticalInput * maxSpeed;
-            if (m_brakeInput)
-                wheel.brakeTorque = breakSpeed;
-            else
-                wheel.brakeTorque = 0;
-        }
-
-    }
-    private void Steer()
-    {
-        foreach (var wheel in wheelColliders)
-        {
-            if (wheel.transform.localPosition.z < centerOfMass.z)
-                wheel.steerAngle = maxSteerAngle * m_horizontalInput;
-        }
+        gameObject = _gameObject;
+        centerOfMass = _centerOfMass;
     }
 
-    private void GetInput()
-    {
-        m_horizontalInput = Input.GetAxis("Horizontal");
-        m_verticalInput = -Input.GetAxis("Vertical");
-        m_brakeInput = Input.GetButton("Jump");
-    }
-
-    private void GetWheels()
+    public void UpdateWheels()
     {
         List<WheelCollider> WheelColliderList = new List<WheelCollider>();
 
         WheelCollider[] childTransforms = gameObject.GetComponentsInChildren<WheelCollider>() as WheelCollider[];
         foreach (var child in childTransforms)
-                WheelColliderList.Add(child);
+            WheelColliderList.Add(child);
 
         wheelColliders = WheelColliderList.ToArray();
     }
 
-    private void RotateWheelsCollider()
+    public void RotateWheelsColliders()
     {
         foreach (var wheel in wheelColliders)
-            if (wheel.transform.localPosition.x > centerOfMass.x)
-                wheel.transform.localRotation = Quaternion.Euler(0, 0, 0);
-            else
-                wheel.transform.localRotation = Quaternion.Euler(0, 180, 0);
+            if (!(wheel is null))
+            wheel.transform.localRotation = IsRightWheel(wheel) ? Quaternion.Euler(0, 0, 0) : Quaternion.Euler(0, 180, 0);
+    }
+
+    public void AnimateMesh()
+    {
+        Vector3 _pos;
+        Quaternion _quat;
+        foreach (var wheel in wheelColliders)
+            if (!(wheel is null))
+            {
+                wheel.GetWorldPose(out _pos, out _quat);
+                wheel.transform.GetChild(0).position = _pos;
+                wheel.transform.GetChild(0).rotation = IsRightWheel(wheel) ? _quat : _quat * Quaternion.Euler(0, 180, 0);
+            }
+    }
+
+    private bool IsRightWheel(WheelCollider wheel)
+    {
+        return wheel.transform.localPosition.x > centerOfMass.x;
+    }
+    private bool IsFrontWheel(WheelCollider wheel)
+    {
+        return wheel.transform.localPosition.z < centerOfMass.z;
+    }
+
+    public void Steer(MachineInput input)
+    {
+        foreach (var wheel in wheelColliders)
+            if (!(wheel is null))
+            {
+                Rotate(wheel, input);
+                Move(wheel, input);
+            }
+    }
+
+    private void Move(WheelCollider wheel, MachineInput input)
+    {
+        wheel.motorTorque = input.Vertical * maxSpeed;
+        wheel.brakeTorque = input.Brake ? breakSpeed : 0;
+    }
+
+    private void Rotate(WheelCollider wheel, MachineInput input)
+    {
+        if (IsFrontWheel(wheel))
+            wheel.steerAngle = maxSteerAngle * input.Horizontal;
+    }
+}
+
+public struct MachineInput
+{
+    private float horizontal;
+    private float vertical;
+    private bool brake;
+
+    public float Horizontal => horizontal;
+    public float Vertical => vertical;
+    public bool Brake => brake;
+
+    public void GetInput()
+    {
+        horizontal = Input.GetAxis("Horizontal");
+        vertical = -Input.GetAxis("Vertical");
+        brake = Input.GetButton("Jump");
     }
 }

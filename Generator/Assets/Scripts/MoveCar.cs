@@ -12,12 +12,12 @@ public class MoveCar : MonoBehaviour
         control.GetInput();
         motor.Steer(control);
     }
-
+    
     private void LateUpdate()
     {
         motor.AnimateMesh();
     }
-
+    
     public void InitWheels()
     {
         motor = new MachinePhysics(gameObject,GetComponent<Rigidbody>().centerOfMass);
@@ -36,31 +36,31 @@ public class MachinePhysics
 
     private Vector3 centerOfMass;
     private WheelCollider[] wheelColliders;
-
+    
     public MachinePhysics(GameObject _gameObject,Vector3 _centerOfMass)
     {
         gameObject = _gameObject;
         centerOfMass = _centerOfMass;
     }
-
+    
     public void UpdateWheels()
     {
         List<WheelCollider> WheelColliderList = new List<WheelCollider>();
-
+    
         WheelCollider[] childTransforms = gameObject.GetComponentsInChildren<WheelCollider>() as WheelCollider[];
         foreach (var child in childTransforms)
             WheelColliderList.Add(child);
-
+    
         wheelColliders = WheelColliderList.ToArray();
     }
-
+    
     public void RotateWheelsColliders()
     {
         foreach (var wheel in wheelColliders)
             if (!(wheel is null))
             wheel.transform.localRotation = IsRightWheel(wheel) ? Quaternion.Euler(0, 0, 0) : Quaternion.Euler(0, 180, 0);
     }
-
+    
     public void AnimateMesh()
     {
         Vector3 _pos;
@@ -73,7 +73,7 @@ public class MachinePhysics
                 wheel.transform.GetChild(0).rotation = IsRightWheel(wheel) ? _quat : _quat * Quaternion.Euler(0, 180, 0);
             }
     }
-
+    
     private bool IsRightWheel(WheelCollider wheel)
     {
         return wheel.transform.localPosition.x > centerOfMass.x;
@@ -82,7 +82,7 @@ public class MachinePhysics
     {
         return wheel.transform.localPosition.z < centerOfMass.z;
     }
-
+    
     public void Steer(MachineInput input)
     {
         foreach (var wheel in wheelColliders)
@@ -92,13 +92,13 @@ public class MachinePhysics
                 Move(wheel, input);
             }
     }
-
+    
     private void Move(WheelCollider wheel, MachineInput input)
     {
         wheel.motorTorque = input.Vertical * maxSpeed;
         wheel.brakeTorque = input.Brake ? breakSpeed : 0;
     }
-
+    
     private void Rotate(WheelCollider wheel, MachineInput input)
     {
         if (IsFrontWheel(wheel))

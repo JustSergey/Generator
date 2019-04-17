@@ -27,13 +27,14 @@ public class Generate : MonoBehaviour
     public void Respawn(Vector3 position, RespawnType respawnType)
     {
         transform.position = position;
+        car.Clear(transform);
         if (respawnType == RespawnType.Recreate)
         {
             Create();
             return;
         }
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
-        car.Clear(transform, grid);
+        car.Update(transform, grid);
         if (respawnType == RespawnType.Mutation)
             car.Mutation();
         car.Generate(0, 2);
@@ -163,11 +164,14 @@ public class Car
         }
     }
 
-    public void Clear(Transform transform, Grid grid)
+    public void Clear(Transform transform)
     {
         for (int i = 0; i < transform.childCount; i++)
             Object.Destroy(transform.GetChild(i).gameObject);
+    }
 
+    public void Update(Transform transform, Grid grid)
+    {
         center = transform.position;
         this.grid = grid;
         Head = new Detail(detailPrefabs.Platform, transform.position, transform.rotation, transform, DetailType.Platform);

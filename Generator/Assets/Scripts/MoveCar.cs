@@ -20,7 +20,7 @@ public class MoveCar : MonoBehaviour
     
     public void InitWheels()
     {
-        motor = new MachinePhysics(gameObject,GetComponent<Rigidbody>().centerOfMass);
+        motor = new MachinePhysics(gameObject, GetComponent<Rigidbody>().centerOfMass);
         motor.UpdateWheels();
         motor.RotateWheelsColliders();
     }
@@ -35,7 +35,7 @@ public class MachinePhysics
     private GameObject gameObject;
 
     private Vector3 centerOfMass;
-    private WheelCollider[] wheelColliders;
+    private List<WheelCollider> wheelColliders;
     
     public MachinePhysics(GameObject _gameObject,Vector3 _centerOfMass)
     {
@@ -45,19 +45,17 @@ public class MachinePhysics
     
     public void UpdateWheels()
     {
-        List<WheelCollider> WheelColliderList = new List<WheelCollider>();
+        wheelColliders = new List<WheelCollider>();
     
         WheelCollider[] childTransforms = gameObject.GetComponentsInChildren<WheelCollider>() as WheelCollider[];
         foreach (var child in childTransforms)
-            WheelColliderList.Add(child);
-    
-        wheelColliders = WheelColliderList.ToArray();
+            wheelColliders.Add(child);
     }
     
     public void RotateWheelsColliders()
     {
         foreach (var wheel in wheelColliders)
-            if (!(wheel is null))
+            if (!IsDestroyed(wheel))
             wheel.transform.localRotation = IsRightWheel(wheel) ? Quaternion.Euler(0, 0, 0) : Quaternion.Euler(0, 180, 0);
     }
     
@@ -66,8 +64,9 @@ public class MachinePhysics
         Vector3 _pos;
         Quaternion _quat;
         foreach (var wheel in wheelColliders)
-            if (!(wheel is null))
+            if (!IsDestroyed(wheel))
             {
+                Debug.Log(wheel is null);
                 wheel.GetWorldPose(out _pos, out _quat);
                 wheel.transform.GetChild(0).position = _pos;
                 wheel.transform.GetChild(0).rotation = IsRightWheel(wheel) ? _quat : _quat * Quaternion.Euler(0, 180, 0);
@@ -86,13 +85,18 @@ public class MachinePhysics
     public void Steer(MachineInput input)
     {
         foreach (var wheel in wheelColliders)
-            if (!(wheel is null))
+            if (!IsDestroyed(wheel))
             {
                 Rotate(wheel, input);
                 Move(wheel, input);
             }
     }
-    
+
+    private static bool IsDestroyed(WheelCollider wheel)
+    {
+        return (wheel.Equals(null));
+    }
+
     private void Move(WheelCollider wheel, MachineInput input)
     {
         wheel.motorTorque = input.Vertical * maxSpeed;

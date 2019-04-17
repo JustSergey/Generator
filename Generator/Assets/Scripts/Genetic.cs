@@ -5,14 +5,27 @@ using UnityEngine;
 [RequireComponent(typeof(Generate))]
 public class Genetic : MonoBehaviour
 {
+    [SerializeField]
+    private float secondsToLife;
+    private Vector3 position;
+    private float time;
+
     void Start()
     {
-        
+        position = transform.position;
+        time = 0f;
     }
     
     void FixedUpdate()
     {
-        if (transform.position.y < 2f)
-            GetComponent<Generate>().ReSpawn(new Vector3(transform.position.x, 10, transform.position.x), true);
+        if (time >= secondsToLife)
+        {
+            GetComponent<Generate>().ReSpawn(position, true);
+            time = 0f;
+        }
+        else
+        {
+            time += Time.fixedDeltaTime;
+        }
     }
 }

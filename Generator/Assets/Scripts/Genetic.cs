@@ -40,11 +40,11 @@ public class Genetic : MonoBehaviour
             }
 
             for (int i = 0; i < bound; i++)
-                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], RespawnType.Default);
+                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], Quaternion.identity, RespawnType.Default);
             for (int i = bound; i < bound * 2; i++)
-                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], RespawnType.Mutation);
+                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], Quaternion.identity, RespawnType.Mutation);
             for (int i = bound * 2; i < cars.Length; i++)
-                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], RespawnType.Recreate);
+                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], Quaternion.identity, RespawnType.Recreate);
 
             time = 0f;
         }

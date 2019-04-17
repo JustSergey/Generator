@@ -24,8 +24,9 @@ public class Generate : MonoBehaviour
         GetComponent<MoveCar>().InitWheels();
     }
 
-    public void Respawn(Vector3 position, RespawnType respawnType)
+    public void Respawn(Vector3 position, Quaternion quaternion, RespawnType respawnType)
     {
+        transform.rotation = quaternion;
         transform.position = position;
         car.Clear(transform);
         if (respawnType == RespawnType.Recreate)

@@ -6,6 +6,8 @@ public class Genetic : MonoBehaviour
 {
     [SerializeField]
     private float secondsToLife;
+    [SerializeField]
+    private bool autoRun;
     private Transform[] cars;
     private Vector3[] begin_positions;
     private float time;
@@ -18,6 +20,7 @@ public class Genetic : MonoBehaviour
         {
             cars[i] = transform.GetChild(i);
             begin_positions[i] = cars[i].position;
+            cars[i].GetComponent<MoveCar>().AutoRun = autoRun;
         }
         time = 0f;
     }
@@ -28,8 +31,11 @@ public class Genetic : MonoBehaviour
         {
             float[] distances = new float[cars.Length];
             for (int i = 0; i < cars.Length; i++)
+            {
                 distances[i] = (cars[i].position - begin_positions[i]).magnitude;
-            
+                cars[i].GetComponent<MoveCar>().AutoRun = autoRun;
+            }
+
             System.Array.Sort(distances, cars);
 
             int bound = (int)(cars.Length * 0.25f);

@@ -8,6 +8,8 @@ public class MoveCar : MonoBehaviour
     private MachinePhysics motor;
     private MachineInput control = new MachineInput();
 
+    public bool AutoRun { get; set; }
+
     void FixedUpdate()
     {
         control.GetInput();
@@ -21,7 +23,7 @@ public class MoveCar : MonoBehaviour
     
     public void InitWheels()
     {
-        motor = new MachinePhysics(gameObject, GetComponent<Rigidbody>().centerOfMass);
+        motor = new MachinePhysics(gameObject, GetComponent<Rigidbody>().centerOfMass, AutoRun);
         motor.UpdateWheels();
         motor.RotateWheelsColliders();
     }
@@ -33,17 +35,19 @@ public class MachinePhysics
     public float maxSpeed = 3000;
     public float breakSpeed = 5500;
     public float maxSteerAngle = 30;
-    public bool autoRun = true;
 
     private GameObject gameObject;
 
     private Vector3 centerOfMass;
     private List<WheelCollider> wheelColliders;
-    
-    public MachinePhysics(GameObject _gameObject,Vector3 _centerOfMass)
+
+    private bool autoRun;
+
+    public MachinePhysics(GameObject _gameObject,Vector3 _centerOfMass, bool _autoRun)
     {
         gameObject = _gameObject;
         centerOfMass = _centerOfMass;
+        autoRun = _autoRun;
     }
     
     public void UpdateWheels()

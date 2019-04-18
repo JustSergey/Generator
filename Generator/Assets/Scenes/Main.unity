@@ -183,7 +183,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!54 &25526714
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -270,7 +269,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!54 &151231653
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -448,7 +446,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!54 &352111471
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -535,7 +532,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!54 &509577988
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -861,7 +857,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!54 &1085820695
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -948,7 +943,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!54 &1131058715
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1035,7 +1029,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!54 &1136716873
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1304,7 +1297,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!54 &1219957956
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1573,7 +1565,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!54 &1361302614
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2161,7 +2152,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da65b5d33833eb34baa09f91cadda9b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  secondsToLife: 3
+  secondsToLife: 10
+  autoRun: 1
+  timeScale: 1
 --- !u!4 &2118950079
 Transform:
   m_ObjectHideFlags: 0
@@ -2252,7 +2245,6 @@ MonoBehaviour:
     maxSpeed: 3000
     breakSpeed: 5500
     maxSteerAngle: 30
-    autoRun: 0
 --- !u!114 &7528661426225410378
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -8,6 +8,9 @@ public class Genetic : MonoBehaviour
     private float secondsToLife;
     [SerializeField]
     private bool autoRun;
+    [SerializeField]
+    private float timeScale;
+
     private Transform[] cars;
     private Vector3[] begin_positions;
     private float time;
@@ -50,12 +53,13 @@ public class Genetic : MonoBehaviour
             for (int i = bound; i < bound * 2; i++)
                 cars[i].GetComponent<Generate>().Respawn(begin_positions[i], Quaternion.identity, RespawnType.Mutation);
             for (int i = bound * 2; i < cars.Length; i++)
-                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], Quaternion.identity, RespawnType.Recreate);
+                cars[i].GetComponent<Generate>().Respawn(begin_positions[i], Quaternion.identity, RespawnType.New);
 
             time = 0f;
         }
         else
         {
+            Time.timeScale = timeScale;
             time += Time.fixedDeltaTime;
         }
     }

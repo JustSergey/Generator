@@ -26,18 +26,18 @@ public class Generate : MonoBehaviour
 
     public void Respawn(Vector3 position, Quaternion quaternion, RespawnType respawnType)
     {
+        GetComponent<Rigidbody>().velocity = Vector3.zero;
+        GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         transform.rotation = quaternion;
         transform.position = position;
         car.Clear(transform);
-        if (respawnType == RespawnType.Recreate)
-        {
-            Create();
-            return;
-        }
+
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
         car.Update(transform, grid);
         if (respawnType == RespawnType.Mutation)
             car.Mutation();
+        else if (respawnType == RespawnType.Recreate)
+            car.NewProbabilities(true);
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
@@ -140,12 +140,9 @@ public class Car
 
     public Car(DetailPrefabs _detailPrefabs, Transform _transform, Grid _grid)
     {
-        center = _transform.position;
         detailPrefabs = _detailPrefabs;
-        grid = _grid;
-        Head = new Detail(detailPrefabs.Platform, _transform.position, _transform.rotation, _transform, DetailType.Platform);
-        grid.SetDetail(Head);
-        probabilities = new Probabilities(true);
+        Update(_transform, _grid);
+        NewProbabilities(true);
     }
 
     public void Generate(int deep, int max_deep)
@@ -177,6 +174,11 @@ public class Car
         this.grid = grid;
         Head = new Detail(detailPrefabs.Platform, transform.position, transform.rotation, transform, DetailType.Platform);
         grid.SetDetail(Head);
+    }
+
+    public void NewProbabilities(bool random)
+    {
+        probabilities = new Probabilities(random);
     }
 
     public void Mutation()

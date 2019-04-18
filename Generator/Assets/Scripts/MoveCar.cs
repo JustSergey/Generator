@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Generate))]
 public class MoveCar : MonoBehaviour
 {
     [SerializeField]

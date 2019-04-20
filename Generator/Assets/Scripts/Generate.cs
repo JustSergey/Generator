@@ -36,14 +36,14 @@ public class Generate : MonoBehaviour
         car.Update(transform, grid);
         if (respawnType == RespawnType.Mutation)
             car.Mutation();
-        else if (respawnType == RespawnType.Recreate)
+        else if (respawnType == RespawnType.New)
             car.NewProbabilities(true);
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
 }
 
-public enum RespawnType { Default, Mutation, Recreate }
+public enum RespawnType { Default, Mutation, New }
 public enum Direction { Forward, Back, Up, AtSide, length }
 public enum DetailType { Empty, Platform, Wheel, Cabin, Weapon, Box, length }
 

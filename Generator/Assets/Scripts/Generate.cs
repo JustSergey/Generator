@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Generate : MonoBehaviour
@@ -38,6 +39,7 @@ public class Generate : MonoBehaviour
             car.Mutation();
         else if (respawnType == RespawnType.New)
             car.NewProbabilities(true);
+        car.SaveProbabilities(position, "Probabilities");
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
@@ -185,6 +187,12 @@ public class Car
     {
         probabilities.Mutation();
     }
+
+    public void SaveProbabilities(Vector3 car_position, string probabilities_path)
+    {
+        Directory.CreateDirectory(probabilities_path);
+        probabilities.Save(probabilities_path + "\\" + car_position.ToString());
+    }
 }
 
 public struct Grid
@@ -245,16 +253,30 @@ public struct Probabilities
         }
     }
 
+    private void SetDefaultWeights()
+    {
+
+    }
+
+    public void Save(string path)
+    {
+        FileStream stream = File.Create(path);
+        for (int i = 0; i < weight.GetLength(0); i++)
+        {
+            for (int j = 0; j < weight.GetLength(1); j++)
+            {
+                byte[] bytes = System.BitConverter.GetBytes(weight[i, j]);
+                stream.Write(bytes, 0, bytes.Length);
+            }
+        }
+        stream.Close();
+    }
+
     public void Mutation()
     {
         int index0 = Random.Range(0, weight.GetLength(0));
         int index1 = Random.Range(0, weight.GetLength(1));
         weight[index0, index1] = Random.Range(0f, 1f);
-    }
-
-    private void SetDefaultWeights()
-    {
-
     }
 
     private float[] Normalize(float[] data)

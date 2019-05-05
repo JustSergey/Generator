@@ -12,6 +12,7 @@ public class Generate : MonoBehaviour
     private void Start()
     {
         Random.InitState((int)System.DateTime.Now.Ticks);
+        Rules.InitRules();
         Create();
     }
 

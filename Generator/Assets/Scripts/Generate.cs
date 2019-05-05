@@ -10,6 +10,7 @@ public class Generate : MonoBehaviour
     private DetailPrefabs detailPrefabs;
 
     private static Car car;
+    const string probabilities_path = "Probabilities";
 
     private void Start()
     {
@@ -21,6 +22,7 @@ public class Generate : MonoBehaviour
     {
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
         car = new Car(detailPrefabs, transform, grid);
+        car.LoadProbabilities(transform.position, probabilities_path);
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
@@ -39,7 +41,7 @@ public class Generate : MonoBehaviour
             car.Mutation();
         else if (respawnType == RespawnType.New)
             car.NewProbabilities(true);
-        car.SaveProbabilities(position, "Probabilities");
+        car.SaveProbabilities(position, probabilities_path);
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
@@ -144,7 +146,7 @@ public class Car
     {
         detailPrefabs = _detailPrefabs;
         Update(_transform, _grid);
-        NewProbabilities(true);
+        NewProbabilities(false);
     }
 
     public void Generate(int deep, int max_deep)
@@ -186,6 +188,11 @@ public class Car
     public void Mutation()
     {
         probabilities.Mutation();
+    }
+
+    public void LoadProbabilities(Vector3 car_position, string probabilities_path)
+    {
+        probabilities.Load(probabilities_path + "\\" + car_position.ToString());
     }
 
     public void SaveProbabilities(Vector3 car_position, string probabilities_path)
@@ -256,6 +263,26 @@ public struct Probabilities
     private void SetDefaultWeights()
     {
 
+    }
+
+    public void Load(string path)
+    {
+        if (!File.Exists(path))
+        {
+            SetRandomWeights();
+            return;
+        }
+        FileStream stream = File.OpenRead(path);
+        for (int i = 0; i < weight.GetLength(0); i++)
+        {
+            for (int j = 0; j < weight.GetLength(1); j++)
+            {
+                byte[] bytes = new byte[sizeof(float)];
+                stream.Read(bytes, 0, bytes.Length);
+                weight[i, j] = System.BitConverter.ToSingle(bytes, 0);
+            }
+        }
+        stream.Close();
     }
 
     public void Save(string path)

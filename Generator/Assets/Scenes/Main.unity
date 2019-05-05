@@ -2152,8 +2152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da65b5d33833eb34baa09f91cadda9b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  secondsToLife: 3
-  autoRun: 0
+  secondsToLife: 10
+  autoRun: 1
   timeScale: 1
 --- !u!4 &2118950079
 Transform:

@@ -40,11 +40,13 @@ public class Genetic : MonoBehaviour
 
             System.Array.Sort(distances, cars);
 
-            int bound = (int)(cars.Length * 0.25f);
+            int bound = (int)(cars.Length * 0.4f);
             for (int k = 0, i = bound; i < bound * 2; i++, k++)
             {
+                string name = cars[i].name;
                 Destroy(cars[i].gameObject);
                 cars[i] = Instantiate(cars[k], transform);
+                cars[i].name = name;
             }
 
             for (int i = 0; i < bound; i++)

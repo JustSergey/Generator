@@ -13,7 +13,7 @@ public class Car
     {
         detailPrefabs = _detailPrefabs;
         Update(_transform, _grid);
-        NewProbabilities(false);
+        NewProbabilities();
     }
 
     public void Generate(int deep, int max_deep)
@@ -46,9 +46,9 @@ public class Car
         this.grid.SetDetail(Head.GetSize(), new Vector3(0, 0, 0));
     }
 
-    public void NewProbabilities(bool random)
+    public void NewProbabilities()
     {
-        probabilities = new Probabilities(random);
+        probabilities = new Probabilities();
     }
 
     public void Mutation()

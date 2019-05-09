@@ -1,15 +1,34 @@
 ﻿using UnityEngine;
 using System.IO;
 
-public struct Probabilities
+public class Probabilities
 {
     private float[,] weight;
+    private float[,,][] probabilities;
 
     public Probabilities(bool random)
     {
+        probabilities = new float[(int)DetailType.length, 10, (int)Direction.length][];
+        for (int i = 0; i < (int)DetailType.length; i++)
+        {
+            for (int j = 0; j < (int)Direction.length; j++)
+            {
+                for (int k = 0; k < 10; k++)
+                    probabilities[i, k, j] = SetRandomProbabilities(Rules.GetRule((DetailType)i, (Direction)j).Length);
+            }
+        }
+
         weight = new float[4, (int)DetailType.length];
         if (random)
             SetRandomWeights();
+    }
+
+    private float[] SetRandomProbabilities(int length)
+    {
+        float[] result = new float[length];
+        for (int i = 0; i < result.Length; i++)
+            result[i] = Random.Range(0f, 1f);
+        return Normalize(result);
     }
 
     private void SetRandomWeights()
@@ -62,9 +81,15 @@ public struct Probabilities
 
     public void Mutation()
     {
+        int i = Random.Range(0, (int)DetailType.length);
+        int j = Random.Range(0, (int)Direction.length);
+        int k = Random.Range(0, 10);
+        probabilities[i, k, j] = SetRandomProbabilities(probabilities[i, k, j].Length);
+        /*
         int index0 = Random.Range(0, weight.GetLength(0));
         int index1 = Random.Range(0, weight.GetLength(1));
         weight[index0, index1] = Random.Range(0f, 1f);
+        */
     }
 
     private float[] Normalize(float[] data)
@@ -80,6 +105,7 @@ public struct Probabilities
 
     public float[] GetProbabilities(DetailType detailType, int deep, Direction direction)
     {
+        return probabilities[(int)detailType, deep, (int)direction];
         float[] result = new float[(int)DetailType.length];
         for (int detail = 0; detail < result.Length; detail++)
         {

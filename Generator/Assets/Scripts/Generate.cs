@@ -20,7 +20,7 @@ public class Generate : MonoBehaviour
     {
         Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
         car = new Car(detailPrefabs, transform, grid);
-        car.LoadProbabilities(transform.position, probabilities_path);
+        //car.LoadProbabilities(transform.position, probabilities_path);
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }
@@ -39,7 +39,7 @@ public class Generate : MonoBehaviour
             car.Mutation();
         else if (respawnType == RespawnType.New)
             car.NewProbabilities(true);
-        car.SaveProbabilities(position, probabilities_path);
+        //car.SaveProbabilities(position, probabilities_path);
         car.Generate(0, 2);
         GetComponent<MoveCar>().InitWheels();
     }

@@ -10,7 +10,7 @@ public class Detail
 
     public Vector3 GridPosition;
     private readonly GameObject detailObject;
-    private readonly DetailType detailType;
+    public readonly DetailType detailType;
     private static Dictionary<Direction, Vector3> directionVector = new Dictionary<Direction, Vector3>
     {
         { Direction.Forward, new Vector3(0, 0, 1) },
@@ -56,13 +56,11 @@ public class Detail
             if (grid.CheckForDetail(grid.CurrentPosition + direction))
                 continue;
 
-            if (!Rules.GetRule(detailType, (Direction)dir))
-            {
-                details[dir] = Empty;
+            DetailType[] possible_details = Rules.GetRule(detailType, (Direction)dir);
+            if (possible_details.Length <= 0)
                 continue;
-            }
-
             float[] probability = probabilities.GetProbabilities(detailType, deep, (Direction)dir);
+
             float rnd = Random.Range(0f, 99.9f);
             float sum = 0f;
             for (int j = 0; j < probability.Length; j++)
@@ -70,7 +68,7 @@ public class Detail
                 sum += probability[j];
                 if (rnd <= sum)
                 {
-                    details[dir] = CreateDetail(detailPrefabs, (DetailType)j, direction, center);
+                    details[dir] = CreateDetail(detailPrefabs, possible_details[j], direction, center);
                     break;
                 }
             }

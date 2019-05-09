@@ -37,8 +37,9 @@ public class Genetic : MonoBehaviour
                 distances[i] = (cars[i].position - begin_positions[i]).magnitude;
                 cars[i].GetComponent<MoveCar>().AutoRun = autoRun;
             }
-
+            
             System.Array.Sort(distances, cars);
+            System.Array.Reverse(cars);
 
             int bound = (int)(cars.Length * 0.4f);
             for (int k = 0, i = bound; i < bound * 2; i++, k++)

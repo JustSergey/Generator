@@ -27,7 +27,6 @@ public class Car
             if (!(details[i] is null) && details[i] != Detail.Empty)
             {
                 Head = details[i];
-                grid.CurrentPosition = Head.GridPosition;
                 Generate(deep, max_deep);
             }
         }
@@ -44,7 +43,7 @@ public class Car
         center = transform.position;
         this.grid = grid;
         Head = new Detail(detailPrefabs.Platform, transform.position, transform.rotation, transform, DetailType.Platform);
-        grid.SetDetail(Head);
+        this.grid.SetDetail(Head.GetSize(), new Vector3(0, 0, 0));
     }
 
     public void NewProbabilities(bool random)

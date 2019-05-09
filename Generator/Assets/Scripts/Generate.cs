@@ -18,7 +18,7 @@ public class Generate : MonoBehaviour
 
     private void Create()
     {
-        Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
+        Grid grid = new Grid(new Vector3(12, 12, 12));
         car = new Car(detailPrefabs, transform, grid);
         //car.LoadProbabilities(transform.position, probabilities_path);
         car.Generate(0, 2);
@@ -33,7 +33,7 @@ public class Generate : MonoBehaviour
         transform.position = position;
         car.Clear(transform);
 
-        Grid grid = new Grid(new Vector3(6, 6, 11), new Vector3(0, 0, 5));
+        Grid grid = new Grid(new Vector3(12, 12, 12));
         car.Update(transform, grid);
         if (respawnType == RespawnType.Mutation)
             car.Mutation();

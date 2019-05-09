@@ -26,7 +26,12 @@ public class Detail
             detailObject = Object.Instantiate(_prefab, _position, _rotation, _parent);
     }
 
-    private Detail CreateDetail(DetailPrefabs detailPrefabs, DetailType detailType, Vector3 direction, Vector3 center)
+    public Vector3 GetSize()
+    {
+        return detailObject.GetComponent<Renderer>().bounds.size;
+    }
+
+    private Detail CreateDetail(DetailPrefabs detailPrefabs, DetailType detailType, Vector3 direction, Grid grid, Vector3 center)
     {
         if (detailType == DetailType.Empty)
             return Empty;
@@ -34,9 +39,14 @@ public class Detail
         var field = typeof(DetailPrefabs).GetFields()[(int)detailType - 1];
         GameObject prefab = (GameObject)field.GetValue(detailPrefabs);
 
-        Vector3 detail_size = detailObject.GetComponent<Renderer>().bounds.size;
+        Vector3 detail_size = GetSize();
         Vector3 prefab_size = prefab.GetComponent<Renderer>().bounds.size;
         Vector3 offset = (detail_size + prefab_size) / 2;
+        if (grid.CheckForCollision(prefab_size, detailObject.transform.position - center + offset))
+            return Empty;
+        else
+            grid.SetDetail(prefab_size, detailObject.transform.position - center + offset);
+
         offset = new Vector3(offset.x * direction.x, offset.y * direction.y, offset.z * direction.z);
         Vector3 position = detailObject.transform.position + offset;
         if (center.x - position.x != 0f)
@@ -53,8 +63,6 @@ public class Detail
         for (int dir = 0; dir < (int)Direction.length; dir++)
         {
             directionVector.TryGetValue((Direction)dir, out Vector3 direction);
-            if (grid.CheckForDetail(grid.CurrentPosition + direction))
-                continue;
 
             DetailType[] possible_details = Rules.GetRule(detailType, (Direction)dir);
             if (possible_details.Length <= 0)
@@ -68,12 +76,10 @@ public class Detail
                 sum += probability[j];
                 if (rnd <= sum)
                 {
-                    details[dir] = CreateDetail(detailPrefabs, possible_details[j], direction, center);
+                    details[dir] = CreateDetail(detailPrefabs, possible_details[j], direction, grid, center);
                     break;
                 }
             }
-            details[dir].GridPosition = grid.CurrentPosition + direction;
-            grid.SetDetail(details[dir], details[dir].GridPosition);
         }
         return details;
     }

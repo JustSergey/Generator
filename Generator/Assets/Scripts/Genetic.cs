@@ -62,9 +62,4 @@ public class Genetic : MonoBehaviour
             time += Time.fixedDeltaTime;
         }
     }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        Debug.Log("TEST");
-    }
 }

@@ -41,7 +41,7 @@ public class Genetic : MonoBehaviour
             System.Array.Sort(distances, cars);
             System.Array.Reverse(cars);
 
-            int bound = (int)(cars.Length * 0.4f);
+            int bound = (int)(cars.Length * 0.1f);
             for (int k = 0, i = bound; i < bound * 2; i++, k++)
             {
                 string name = cars[i].name;
@@ -49,12 +49,26 @@ public class Genetic : MonoBehaviour
                 cars[i] = Instantiate(cars[k], transform);
                 cars[i].name = name;
             }
+            for (int k = 0, i = bound * 2; i < bound * 4; i++, k++)
+            {
+                string name = cars[i].name;
+                Destroy(cars[i].gameObject);
+                cars[i] = Instantiate(cars[k], transform);
+                cars[i].name = name;
+            }
+            for (int k = 0, i = bound * 4; i < bound * 8; i++, k++)
+            {
+                string name = cars[i].name;
+                Destroy(cars[i].gameObject);
+                cars[i] = Instantiate(cars[k], transform);
+                cars[i].name = name;
+            }
 
-            for (int i = 0; i < bound; i++)
+            for (int i = 0; i < bound * 4; i++)
                 cars[i].GetComponent<Generate>().Respawn(begin_positions[i], Quaternion.identity, RespawnType.Default);
-            for (int i = bound; i < bound * 2; i++)
+            for (int i = bound * 4; i < bound * 8; i++)
                 cars[i].GetComponent<Generate>().Respawn(begin_positions[i], Quaternion.identity, RespawnType.Mutation);
-            for (int i = bound * 2; i < cars.Length; i++)
+            for (int i = bound * 8; i < cars.Length; i++)
                 cars[i].GetComponent<Generate>().Respawn(begin_positions[i], Quaternion.identity, RespawnType.New);
 
             time = 0f;

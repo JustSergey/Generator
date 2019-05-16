@@ -73,10 +73,14 @@ public class Probabilities
 
     public void Mutation()
     {
-        int i = Random.Range(0, (int)DetailType.length);
-        int j = Random.Range(0, (int)Direction.length);
-        int k = Random.Range(0, max_deep);
-        probabilities[i, k, j] = SetRandomProbabilities(probabilities[i, k, j].Length);
+        int n = Random.Range(1, 3);
+        for (int p = 0; p < n; p++)
+        {
+            int i = Random.Range(0, (int)DetailType.length);
+            int j = Random.Range(0, (int)Direction.length);
+            int k = Random.Range(0, max_deep);
+            probabilities[i, k, j] = SetRandomProbabilities(probabilities[i, k, j].Length);
+        }
     }
 
     private float[] Normalize(float[] data)

@@ -42,10 +42,10 @@ public class Detail
         Vector3 detail_size = GetSize();
         Vector3 prefab_size = prefab.GetComponent<Renderer>().bounds.size;
         Vector3 offset = (detail_size + prefab_size) / 2;
-        if (grid.CheckForCollision(prefab_size, detailObject.transform.position - center + offset))
-            return Empty;
-        else
-            grid.SetDetail(prefab_size, detailObject.transform.position - center + offset);
+        //if (grid.CheckForCollision(prefab_size, detailObject.transform.position - center + offset))
+        //    return Empty;
+        // else
+        //    grid.SetDetail(prefab_size, detailObject.transform.position - center + offset);
 
         offset = new Vector3(offset.x * direction.x, offset.y * direction.y, offset.z * direction.z);
         Vector3 position = detailObject.transform.position + offset;
